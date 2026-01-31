@@ -1,0 +1,45 @@
+#pack {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: 250px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#pack input[type="text"] {
+  width: 15px;                 
+  padding: 6px 10px;            
+  border: 2px solid #333;       
+  border-radius: 6px;           
+  font-size: 16px;
+  text-align: center;           
+  outline: none;
+  background: #f0f0f0;         
+  transition: 
+    width 0.3s, 
+    text-align 0.3s, 
+    border-color 0.2s, 
+    box-shadow 0.2s;
+}
+
+/* tamaño: expandir si hover/focus o tiene texto */
+#pack input[type="text"]:hover,
+#pack input[type="text"]:focus,
+#pack input[type="text"]:not(:placeholder-shown) {
+  width: 220px;                
+  text-align: left;             
+}
+
+/* efecto visual de foco */
+#pack input[type="text"]:focus {
+  border-color: #0B233D;
+  box-shadow: 0 0 5px #1E1F1E;
+}
+
+/* placeholder invisible */
+#pack input[type="text"]::placeholder {
+  color: transparent;
+}
