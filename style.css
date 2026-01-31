@@ -1,3 +1,10 @@
+html, body {
+  margin: 0; 
+  padding: 0; 
+  width: 100%;
+  height: 100%;
+}
+
 #pack {
   position: absolute;
   top: 0;
@@ -25,7 +32,6 @@
     box-shadow 0.2s;
 }
 
-/* tamaño: expandir si hover/focus o tiene texto */
 #pack input[type="text"]:hover,
 #pack input[type="text"]:focus,
 #pack input[type="text"]:not(:placeholder-shown) {
@@ -33,13 +39,11 @@
   text-align: left;             
 }
 
-/* efecto visual de foco */
 #pack input[type="text"]:focus {
   border-color: #0B233D;
   box-shadow: 0 0 5px #1E1F1E;
 }
 
-/* placeholder invisible */
 #pack input[type="text"]::placeholder {
   color: transparent;
 }
