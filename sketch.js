@@ -185,11 +185,11 @@ function drawFunction() {
           square(x, y, step);
         }
         
-        //dibujar ejes de coordenadas
-        if (abs(x - viewPort.x) <= 5 || abs(y - viewPort.y) <= 5) {
-          fill("rgb(89,141,89)");
-          square(x, y, step);
-        }
+      }
+      //dibujar ejes de coordenadas
+      if (abs(x - viewPort.x) <= 5 || abs(y - viewPort.y) <= 5) {
+        fill("rgb(89,141,89)");
+        square(x, y, step);
       }
     }
   }
