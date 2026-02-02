@@ -22,7 +22,7 @@ function setup() {
   };
   noStroke();
   createNewInput()
-  slider = createSlider(0.1, 10, 10, 0.1);
+  slider = createSlider(0.01, 10, 10, 0.01);
 }
 function createNewInput(){
   //crea un nuevo input para formula
