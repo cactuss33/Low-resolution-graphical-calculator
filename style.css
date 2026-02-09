@@ -58,3 +58,9 @@ html, body {
 #pack input[type="text"]:not(:placeholder-shown)::placeholder {
   opacity: 0;
 }
+
+#pack label {
+  display: inline-flex;
+  align-items: center;
+}
+
