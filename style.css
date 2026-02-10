@@ -59,8 +59,17 @@ html, body {
   opacity: 0;
 }
 
-#pack label {
-  display: inline-flex;
-  align-items: center;
+p {
+  white-space: nowrap;
 }
 
+input{
+  margin-right:10px;
+}
+
+.fila{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 44px;
+}
