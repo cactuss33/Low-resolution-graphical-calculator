@@ -1,7 +1,7 @@
 let formula = [];
 let step = 10;
 let fact = 0.1;
-let viewPort = {
+let viewPort = { // camara
   x: 0,
   y: 0,
 };
@@ -10,9 +10,10 @@ let zoom = 1
 
 let polynomialFormula = [];
 let inputData = [
-  [],
-  [],
-  []
+  [], // filas
+  [], // inputs
+  [], // etiquetas
+  [] // indicadores de tipo
 ]
 let variables = {};
 let slider;
@@ -22,22 +23,25 @@ let renderModeDescription = [
   "smooth curves (continuous)"
 ]
 
-//el valor por el cual "y" se multiplica antes de renderizar
+// el valor por el cual "y" se multiplica antes de renderizar
 let finalMultiplier = []
 
 let renderMode = 1
 let showInfo = 0
 
 function setup() {
-  createCanvas(windowWidth, windowHeight - 50);
+  createCanvas(windowWidth, windowHeight);
   background(255);
+  
   viewPort = {
     x: width / 2,
     y: height / 2,
   };
-  noStroke();
+  
   createNewInput()
   slider = createSlider(0.1, 10, 10, 0.1);
+  
+  noStroke();
   textSize(15)
 }
 function createNewInput(){
@@ -52,12 +56,22 @@ function createNewInput(){
   const lable = createP("");
   lable.parent(fila);
   
+  const type = createDiv()
+  type.parent(fila)
+  
   inputData[0].push(fila)
   inputData[1].push(inputs)
   inputData[2].push(lable)
+  inputData[3].push(type)
+}
+function removeInput(){
+  if(inputData[0].length < 1) return
+  inputData[0].pop().remove(); // elimina div
+  inputData[1].pop().remove(); // elimina input
+  inputData[2].pop().remove(); // elimina botón
 }
 
-//mouse && camera
+// mouse && camera
 let startPointX = 0;
 let startPointY = 0;
 let isDragging = false;
@@ -98,44 +112,29 @@ function mouseReleased() {
 function touchEnded() {
   isDragging = false;
 }
-//--------------
+// --------------
 
 function draw() {
-  //movimiento con las flechas
-  if (document.activeElement !== inputData[1].elt) {
-    if (keyIsDown(RIGHT_ARROW)) viewPort.x -= 4;
-    if (keyIsDown(LEFT_ARROW)) viewPort.x += 4;
-    if (keyIsDown(DOWN_ARROW)) viewPort.y -= 4;
-    if (keyIsDown(UP_ARROW)) viewPort.y += 4;
-    if (keyIsDown(187)) zoom -= 0.01;
-    if (keyIsDown(189)) zoom += 0.01;
-    if (keyIsDown) drawFunction();
-  }
   
-  //crear nuevo input al ver que el ultimo ya esta lleno
-if(inputData[1][inputData[1].length - 1].value() != ""){
+  // movimiento con las flechas
+  if (keyIsDown(RIGHT_ARROW)) viewPort.x -= 4;
+  if (keyIsDown(LEFT_ARROW)) viewPort.x += 4;
+  if (keyIsDown(DOWN_ARROW)) viewPort.y -= 4;
+  if (keyIsDown(UP_ARROW)) viewPort.y += 4;
+  if (keyIsDown(187)) zoom -= 0.01;
+  if (keyIsDown(189)) zoom += 0.01;
+  if (keyIsDown) drawFunction();
+  
+  // crear nuevo input al ver que el ultimo ya esta lleno
+  if(inputData[1][inputData[1].length - 1].value() != ""){
     createNewInput()
   }
+  // eliminar input
   if(inputData[0].length > 1 && inputData[1][inputData[1].length - 2].value() == ""){
     removeInput()
   }
-
-}
-function removeInput(){
-  if(inputData[0].length < 1) return
-  inputData[0].pop().remove(); // elimina div
-  inputData[1].pop().remove(); // elimina input
-  inputData[2].pop().remove(); // elimina botón
 }
 function keyPressed() {
-  //test
-  if (key == "q") {
-    // noLoop();
-    step = 4;
-    background(220);
-    drawFunction();
-  }
-  //--------
   if(key == "Escape"){
     document.activeElement.blur();
   }
@@ -152,75 +151,80 @@ function keyPressed() {
       showInfo = 0
   }
 }
-//estas variables se crean aqui para no estar creando y destruyendo variables locales en cada for
-//para optimizar
+
+
+// estas variables se crean aqui para no estar creando y destruyendo variables locales en cada for
+// para optimizar
 let lastFormula = "";
 let varName = "";
 let varValue = 0;
-
+let toRenderAfter = [];
+let skipRender = false;
 
 function drawFunction() {
-  //se encarga de dibujar un frame
+  // se encarga de dibujar un frame
   
   fact = slider.value();
   background(255);
   
-  //se reinician todas las variables
+  // se reinician todas las variables
   formula = [];
   polynomialFormula = [];
   variables = {};
-
+  toRenderAfter = []
+  skipRender = false
   
+  // como y neceesita ser tratada diferente con el modo que va fluido,
+  // se reinicia aqui el valor por el qual se multiplicara y al final
+  // si es que esto tiene sentido
   finalMultiplier = new Array(formula.length).fill(1)
   
-  //extraer cada grupo de polinomios de cada input
+  // extraer cada grupo de polinomios de cada input
   for (let i = 0; i < inputData[1].length; i++) {
-    //operar cada formula
+    // operar cada input
     lastFormula = inputData[1][i].value();
-    formula.push(lastFormula);
+    formula.push(lastFormula); // carga en formula los valores
 
-    
-    //si contiene el prefijo "var" tratar como una variable y skippear el "analisis" de la formula
+    // si contiene el prefijo "var" tratar como una variable y skippear el "analisis" de la formula
     if (lastFormula.slice(0, 3) == "var") {
       lastFormula = lastFormula.slice(3);
       varName = lastFormula.replace(/[^a-zA-Z]/g, "").split("")[0];
       varValue = lastFormula.replace(/[^0-9.-]/g, "");
       if (varName != undefined) variables[varName] = float(varValue);
-      continue;
+      skipRender = true;
     }
+    
+    // si contiene el prefijo "plot" tratar como un punto a dibujar
     if (lastFormula.slice(0, 4) == "plot") {
       lastFormula = lastFormula.slice(4);
       varName = lastFormula.replace(/[^a-zA-Z]/g, "").split("").join("");
       varValue = lastFormula.replace(/[^0-9.,-]/g, "").split(",");
+      
       if (varName != undefined)
-        variables[varName] = float(varValue);
-      // stroke("black")
-      if(varValue.length == 2){
-        // fill("#3100577F")
-        fill("red")
-        circle(
-          float(varValue[0]) + viewPort.x,
-          float(varValue[1]) + viewPort.y,
-          10
-        )
-        textAlign(CENTER)
-        fill("black")
-        text(
-          varName,
-          float(varValue[0]) + viewPort.x,
-          float(varValue[1]) + viewPort.y + 20,
-        )
+        variables[varName] = float(varValue); 
+      if(inputData[1][i].elt === document.activeElement){
+        if(varName == "" && varValue.length == 1)
+          varName = "point"
+        if(varValue.length != 2)
+          varValue = [0,0]
       }
-      continue;
+      inputData[1][i].value("plot " + varName + " = (" + varValue[0] + "," + varValue[1] + ")")
+        
+      if(varValue.length == 2){
+        toRenderAfter.push(["plot",varName,varValue])
+      }
+      skipRender = true
     }
     
+    // analizar formula
     if (lastFormula != "")
       polynomialFormula.push(formulaToPolynomial(lastFormula,i));
-    //if polynomialFormula is undefined set to ""
+    
+    // si polynomialFormula es undefined, set to ""
     if (polynomialFormula[polynomialFormula.length - 1] == "undefined")
       polynomialFormula[polynomialFormula.length - 1] = "";
     
-    //actualizar la etiqueta que muestra la evaluacion de la formula
+    // actualizar la etiqueta que muestra la evaluacion de la formula (si es debido)
     if(showInfo == 1){
       if(i == inputData[2].length - 1)
           inputData[2][i].html("upToCreate")
@@ -236,92 +240,136 @@ function drawFunction() {
   }
 
 
-  //optimizacion
+  // optimizacion
   let result = 0;
   let nextColor = 0;
+  // solucion para poder dibujar cada funcion, guarda cada punto y de cada x en la lista para luego poder hacer la linea seguida
   let lastPointX = new Array(formula.length).fill(0)
   let lastPointY = new Array(formula.length).fill(0)
   
-  if(renderMode == 0){
-    //loop que recorre cada pixel
-    //coord x -> coord y -> cada formula -> cada polinomio
-    for (let x = 0; x < width; x += step) {
-      //cada x
-      for (let y = 0; y < height; y += step) {
-        //cada y
-        for (let o = 0; o < polynomialFormula.length; o++) {
-          //cada formula indiv
-          result = 0;
-          for (let i = 0; i < polynomialFormula[o].length; i++) {
-            //cada polinomio
-            result += evaluate(
-              polynomialFormula[o][i],
-              x - viewPort.x,
-              y - viewPort.y,
-              { ...variables } //pasa una copia
-            );
+  // evaluacion por pixel ->
+  if(renderMode == 0){ // --------------------------------------
+      // loop que recorre cada pixel
+      // coord x -> coord y -> cada formula -> cada polinomio
+      for (let x = 0; x < width; x += step) {
+        // cada x
+        for (let y = 0; y < height; y += step) {
+          // cada y
+          for (let o = 0; o < polynomialFormula.length; o++) {
+            // cada formula indiv
+            
+            result = 0;
+            for (let i = 0; i < polynomialFormula[o].length; i++) {
+              // cada polinomio
+              result += evaluate(
+                polynomialFormula[o][i],
+                x - viewPort.x,
+                y - viewPort.y,
+                { ...variables } // pasa una copia
+              );
+            }
+
+            // guardar el color del pixel
+            nextColor = abs(result) * fact;
+
+            // si es blanco no dibujar nada
+            if (nextColor < 255) {
+              fill(nextColor);
+              square(x, y, step);
+            }
           }
-
-          //guardar el color del pixel
-          nextColor = abs(result) * fact;
-
-          //si es blanco no dibujar nada
-          if (nextColor < 255) {
-            fill(nextColor);
+          // dibujar ejes de coordenadas
+          if (abs(x - viewPort.x) <= 5 || abs(y - viewPort.y) <= 5) {
+            fill("rgb(89,141,89)");
             square(x, y, step);
           }
-
-        }
-        //dibujar ejes de coordenadas
-        if (abs(x - viewPort.x) <= 5 || abs(y - viewPort.y) <= 5) {
-          fill("rgb(89,141,89)");
-          square(x, y, step);
         }
       }
-    }
-  }else{
-    push()
-    strokeWeight(10)
-    stroke("rgb(89,141,89)")
-    line(viewPort.x,0,viewPort.x,height)
-    line(0,viewPort.y,width,viewPort.y)
-    strokeWeight(5)
-    stroke("black")
-    strokeWeight(5)
-  
-    for(let x = 0;x < width;x += step/4){
-      for (let o = 0; o < polynomialFormula.length; o++) {
-        result = 0;
-        
-        //cada formula indiv
-        if(polynomialFormula[o] !== undefined)
+}
+
+  // evaluacion por x
+  if(renderMode == 1){ // --------------------------------------
+
+      push()
+
+      //dibujar eje de cordenadas
+      strokeWeight(10)
+      stroke("rgb(89,141,89)")
+      line(viewPort.x,0,viewPort.x,height)
+      line(0,viewPort.y,width,viewPort.y)
+
+      strokeWeight(5)
+      stroke("black")
+      strokeWeight(5)
+
+      //recorrer cada x
+      for(let x = 0;x < width;x += step/4){
+
+        //recorrer cada formula
+        for (let o = 0; o < polynomialFormula.length; o++) {
+          
+          if(polynomialFormula[o] == undefined){
+            continue
+          }
+          result = 0;
+
+          // cada formula indiv
           for (let i = 0; i < polynomialFormula[o].length; i++) {
-            //cada polinomio
+            // cada polinomio
             result += evaluate(
               polynomialFormula[o][i],
               x - viewPort.x,
               0,
-              { ...variables } //pasa una copia
+              { ...variables } // pasa una copia
             );
           }
-        if(result != 0)
-          result /= finalMultiplier[o]
-        
-        if(x == 0){
-          lastPointX[o] = x
-          lastPointY[o] = result + viewPort.y    
-        }
-        
-        line(lastPointX[o],lastPointY[o],x,result + viewPort.y)
-        // square(x, result + viewPort.y, step);
-        lastPointX[o] = x
-        lastPointY[o] = result + viewPort.y
-      }
-    }
-    pop()
-  }
 
-  //fragmento innecesario
+          if(result != 0)
+            result /= finalMultiplier[o]
+
+          //si x es igual a 0 duplicar punto dos veces
+          if(x == 0){
+            lastPointX[o] = x
+            lastPointY[o] = result + viewPort.y    
+          }
+
+          //dibujar el segmento
+          line(lastPointX[o],lastPointY[o],x,result + viewPort.y)
+
+          lastPointX[o] = x
+          lastPointY[o] = result + viewPort.y
+        }
+      }
+      pop()
+}
+  
+  // afterRender (encargado de dibujar puntos i en un futuro mas objetos de la interfaz)
+  push()
+  for(let i of toRenderAfter){
+    if(i[0] == "plot"){     
+      fill("black")
+      textAlign(CENTER)
+      textStyle(BOLD)
+      text(
+        i[1],
+        float(i[2][0]) + viewPort.x,
+        -float(i[2][1]) + viewPort.y + 20
+      )
+      fill("#0060A7")
+      // i[2] corresponde a una lista con coordenadas -> [40,80]
+      stroke("black")
+      circle(
+        float(i[2][0]) + viewPort.x,
+        -float(i[2][1]) + viewPort.y,
+        10
+      )
+      noStroke()
+      // console.log("wanna draw a point at: " + i[2] + ", with the name: " + i[1])   
+    }
+  }
+  pop()
+  
+  // mostrar informacion
   if(showInfo == 1){
     textAlign(RIGHT)
     fill("black");
@@ -362,39 +410,37 @@ function drawFunction() {
       height - i
     )
   }
-  //-----------
+  // -----------
 }
 
-//estas variables se crean aqui para no estar creando y destruyendo variables locales en cada for
-//para optimizar
+// estas variables se crean aqui para no estar creando y destruyendo variables locales en cada for
+// para optimizar
 let sign;
 let number;
 
-function evaluate(polinomi, x, y, vars) {
-   // x *= zoom
-   // y *= zoom 
-  //esta funcion se encarga de evaluar el valor de un solo polinomio
-  //le pasas la x, y a evaluar y el objeto {vars} que contiene un diccionario con el valor de las variables creadas por el usuario
+function evaluate(polinomi, x, y, vars) { 
+  // esta funcion se encarga de evaluar el valor de un solo polinomio
+  // le pasas la x, y a evaluar y el objeto {vars} que contiene un diccionario con el valor de las variables creadas por el usuario
   
-  //invierte el eje y porque el 0, 0 se encuentra en la esquina superior izquierda
+  // invierte el eje y porque el 0, 0 se encuentra en la esquina superior izquierda
   y *= -1;
 
-  //resta de bools que se traduce en un integer
+  // resta de bools que se traduce en un integer
   sign = polinomi.includes("+") - polinomi.includes("-");
 
   if (sign != 0) polinomi = polinomi.slice(1);
   else sign = 1;
 
-  //extraer los numeros del polinomio
+  // extraer los numeros del polinomio
   number = float(polinomi.replace(/\D/g, ""));
   if (Number.isNaN(number)) number = 1;
 
   polinomi = polinomi.slice(number.length);
 
   
-  //1. busca todos los simbolos de elevar al cuadrado
-  //2. por cada $ se eleva el valor anterior
-  //3. si es x o y se multiplica pero si es una variable del usuariose busca si esa variable existe y luego se sobreescribe el valor por la version elevada
+  // 1. busca todos los simbolos de elevar al cuadrado
+  // 2. por cada $ se eleva el valor anterior
+  // 3. si es x o y se multiplica pero si es una variable del usuariose busca si esa variable existe y luego se sobreescribe el valor por la version elevada
   for (let i = 0; i < polinomi.length; i++) {
     if (polinomi[i] == "$") {
       switch (polinomi[i - 1]) {
@@ -412,7 +458,7 @@ function evaluate(polinomi, x, y, vars) {
     }
   }
 
-  //todas las variables se multiplican por el numero
+  // todas las variables se multiplican por el numero
   if (polinomi.includes("x")) number *= x;
   if (polinomi.includes("y")) number *= y;
 
@@ -424,28 +470,28 @@ function evaluate(polinomi, x, y, vars) {
   return number;
 }
 
-//estas variables se crean aqui para no estar creando y destruyendo variables locales en cada for
-//para optimizar
+// estas variables se crean aqui para no estar creando y destruyendo variables locales en cada for
+// para optimizar
 let segments;
 let currentEval;
 let yPolynoms;
 
 function formulaToPolynomial(formula, index = 1) {
-  //la funcion se encarga de pasar el texto y pasarlo a polinomios
-  //se asegura que no haya una igualdad para que se pueda comparar con 0
+  // la funcion se encarga de pasar el texto y pasarlo a polinomios
+  // se asegura que no haya una igualdad para que se pueda comparar con 0
   
-  //divide la formula por el "=" creando dos elementos de una lista
+  // divide la formula por el "=" creando dos elementos de una lista
   segments = formula.replace(/\s+/g, "").split("=");
 
-  //divide el primer segmento en polinomios
+  // divide el primer segmento en polinomios
   segments[0] = segments[0].split(/(?=[+-])/);
   
-  if (segments.length == 2) { //si hay una igualdad en la formula original:
+  if (segments.length == 2) { // si hay una igualdad en la formula original:
     
-    //divide el segundo segmento en polinomios
+    // divide el segundo segmento en polinomios
     segments[1] = segments[1].split(/(?=[+-])/);
     
-    //recorre cada polinomio pasandolo en su version inversa i al segmento 1
+    // recorre cada polinomio pasandolo en su version inversa i al segmento 1
     for (let i = 0; i < segments[1].length; i++) {
       currentEval = segments[1][i];
       if (currentEval[0] == "-") currentEval = "+" + currentEval.slice(1);
@@ -455,15 +501,17 @@ function formulaToPolynomial(formula, index = 1) {
     }
   }
   
-  //si renderMode == 0 devuelve el primer segmento
-  //deberia contener toda la formula igualada "= 0"
+  // si renderMode == 0 devuelve el primer segmento
+  // deberia contener toda la formula igualada "= 0"
   
-  //si renderMode != 0 continua para aislar la y
-  //deberia contener toda la formula igualada a "= y"
+  // si renderMode != 0 continua para aislar la y
+  // deberia contener toda la formula igualada a "= y"
   
   if(renderMode == 0){
     return segments[0];
-  }else{
+    
+  }
+  if(renderMode == 1){
     yPolynoms = []
     for(let i in segments[0]){
       if(segments[0][i].includes("y")){
