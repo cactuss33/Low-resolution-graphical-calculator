@@ -9,8 +9,11 @@ let viewPort = {
 let zoom = 1
 
 let polynomialFormula = [];
-let functionInputGui = [];
-let functionLableGui = [];
+let inputData = [
+  [],
+  [],
+  []
+]
 let variables = {};
 let slider;
 
@@ -38,22 +41,20 @@ function setup() {
   textSize(15)
 }
 function createNewInput(){
-  //crea un nuevo input para formula
-  let lastFunctionIndex = functionInputGui.length
-  let lastTextIndex = functionLableGui.length
-  functionInputGui.push();
-  functionInputGui[lastFunctionIndex] = createInput();
-  functionInputGui[lastFunctionIndex].input(drawFunction);
+  const fila = createDiv().addClass("fila");
+  fila.parent("pack"); 
   
-  functionInputGui[lastFunctionIndex].parent("pack");
-  functionInputGui[lastFunctionIndex].attribute('placeholder', '+')
-  
-  if(lastFunctionIndex - 1 > lastTextIndex)
-    lastTextIndex = functionLableGui.length
-    functionLableGui.push(createP(""))
-    functionLableGui[lastTextIndex].parent("pack");
+  const inputs = createInput();
+  inputs.parent(fila);
+  inputs.attribute('placeholder', '+')
   
   
+  const lable = createP("");
+  lable.parent(fila);
+  
+  inputData[0].push(fila)
+  inputData[1].push(inputs)
+  inputData[2].push(lable)
 }
 
 //mouse && camera
@@ -101,7 +102,7 @@ function touchEnded() {
 
 function draw() {
   //movimiento con las flechas
-  if (document.activeElement !== functionInputGui.elt) {
+  if (document.activeElement !== inputData[1].elt) {
     if (keyIsDown(RIGHT_ARROW)) viewPort.x -= 4;
     if (keyIsDown(LEFT_ARROW)) viewPort.x += 4;
     if (keyIsDown(DOWN_ARROW)) viewPort.y -= 4;
@@ -112,16 +113,19 @@ function draw() {
   }
   
   //crear nuevo input al ver que el ultimo ya esta lleno
-  if(functionInputGui[functionInputGui.length - 1].value() != ""){
+if(inputData[1][inputData[1].length - 1].value() != ""){
     createNewInput()
   }
-  if(functionInputGui.length > 1 && functionInputGui[functionInputGui.length - 2].value() == ""){
-    functionInputGui[functionInputGui.length - 1].remove()
-    functionLableGui[functionInputGui.length - 1].remove()
-    functionInputGui.pop()
-    functionLableGui.pop()
+  if(inputData[0].length > 1 && inputData[1][inputData[1].length - 2].value() == ""){
+    removeInput()
   }
 
+}
+function removeInput(){
+  if(inputData[0].length < 1) return
+  inputData[0].pop().remove(); // elimina div
+  inputData[1].pop().remove(); // elimina input
+  inputData[2].pop().remove(); // elimina botón
 }
 function keyPressed() {
   //test
@@ -170,9 +174,9 @@ function drawFunction() {
   finalMultiplier = new Array(formula.length).fill(1)
   
   //extraer cada grupo de polinomios de cada input
-  for (let i = 0; i < functionInputGui.length; i++) {
+  for (let i = 0; i < inputData[1].length; i++) {
     //operar cada formula
-    lastFormula = functionInputGui[i].value();
+    lastFormula = inputData[1][i].value();
     formula.push(lastFormula);
 
     
@@ -218,17 +222,17 @@ function drawFunction() {
     
     //actualizar la etiqueta que muestra la evaluacion de la formula
     if(showInfo == 1){
-      if(i == functionInputGui.length - 1)
-          functionLableGui[i].html("upToCreate")
+      if(i == inputData[2].length - 1)
+          inputData[2][i].html("upToCreate")
       
       else if(polynomialFormula[i] == undefined)
-        functionLableGui[i].html("incompleted formula")
+        inputData[2][i].html("incompleted formula")
   
       else
-        functionLableGui[i].html(polynomialFormula[i].join(" "))
+        inputData[2][i].html(polynomialFormula[i].join(" "))
     }
     else
-      functionLableGui[i].html("")
+      inputData[2][i].html("")
   }
 
 
