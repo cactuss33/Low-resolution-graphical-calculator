@@ -7,6 +7,7 @@ let viewPort = { // camara
 };
 
 let zoom = 1
+let gridSize = 50
 
 let polynomialFormula = [];
 let inputData = [
@@ -121,9 +122,36 @@ function draw() {
   if (keyIsDown(LEFT_ARROW)) viewPort.x += 4;
   if (keyIsDown(DOWN_ARROW)) viewPort.y -= 4;
   if (keyIsDown(UP_ARROW)) viewPort.y += 4;
-  if (keyIsDown(187)) zoom -= 0.01;
-  if (keyIsDown(189)) zoom += 0.01;
-  if (keyIsDown) drawFunction();
+  if (keyIsDown(187) && zoom < 4) zoom += zoom/50;
+  if (keyIsDown(189) && zoom > 0.1) zoom -= zoom/50;
+  
+  // ---------- loop ------------
+  gridSize = 50 * zoom
+  
+  background(255);
+  if(renderMode == 1){
+    stroke("black")
+    strokeWeight(0.4)
+    for(let x = 0; x < width + 50; x += gridSize){
+      line(
+        x + (viewPort.x % gridSize),
+        0,
+        x + (viewPort.x % gridSize),
+        height
+      )
+    }
+    for(let y = 0; y < height + 50; y += gridSize){
+      line(
+        0,
+        y + (viewPort.y % gridSize),
+        width,
+        y + (viewPort.y % gridSize)
+      )
+    }
+  }
+
+  drawFunction();
+  // ----------------------------
   
   // crear nuevo input al ver que el ultimo ya esta lleno
   if(inputData[1][inputData[1].length - 1].value() != ""){
@@ -164,10 +192,8 @@ let skipRender = false;
 function drawFunction() {
   // se encarga de dibujar un frame
   
-  fact = slider.value();
-  background(255);
-  
   // se reinician todas las variables
+  fact = slider.value();
   formula = [];
   polynomialFormula = [];
   variables = {};
@@ -287,61 +313,64 @@ function drawFunction() {
       }
 }
 
-  // evaluacion por x
+  // evaluacion por x ->
   if(renderMode == 1){ // --------------------------------------
+    push()
+    
+    stroke("black")
+    strokeWeight(0.4)
+    
+    //dibujar eje de cordenadas
+    strokeWeight(10)
+    stroke("rgb(89,141,89)")
+    line(viewPort.x,0,viewPort.x,height)
+    line(0,viewPort.y,width,viewPort.y)
+    strokeWeight(5)
 
-      push()
+    stroke("black")
+    
+    //recorrer cada x
+    for(let x = 0;x < width;x += step/4){
 
-      //dibujar eje de cordenadas
-      strokeWeight(10)
-      stroke("rgb(89,141,89)")
-      line(viewPort.x,0,viewPort.x,height)
-      line(0,viewPort.y,width,viewPort.y)
-
-      strokeWeight(5)
-      stroke("black")
-      strokeWeight(5)
-
-      //recorrer cada x
-      for(let x = 0;x < width;x += step/4){
-
-        //recorrer cada formula
-        for (let o = 0; o < polynomialFormula.length; o++) {
-          
-          if(polynomialFormula[o] == undefined){
-            continue
-          }
-          result = 0;
-
-          // cada formula indiv
-          for (let i = 0; i < polynomialFormula[o].length; i++) {
-            // cada polinomio
-            result += evaluate(
-              polynomialFormula[o][i],
-              x - viewPort.x,
-              0,
-              { ...variables } // pasa una copia
-            );
-          }
-
-          if(result != 0)
-            result /= finalMultiplier[o]
-
-          //si x es igual a 0 duplicar punto dos veces
-          if(x == 0){
-            lastPointX[o] = x
-            lastPointY[o] = result + viewPort.y    
-          }
-
-          //dibujar el segmento
-          line(lastPointX[o],lastPointY[o],x,result + viewPort.y)
-
-          lastPointX[o] = x
-          lastPointY[o] = result + viewPort.y
+      //recorrer cada formula
+      for (let o = 0; o < polynomialFormula.length; o++) {
+        
+        if(polynomialFormula[o] == undefined){
+          continue
         }
+        result = 0;
+
+        // cada formula indiv
+        for (let i = 0; i < polynomialFormula[o].length; i++) {
+          // cada polinomio
+          result += evaluate(
+            polynomialFormula[o][i],
+            (x - viewPort.x) / zoom,
+            0,
+            { ...variables } // pasa una copia
+          );
+        }
+
+          
+        result *= zoom
+          
+        if(result != 0)
+          result /= finalMultiplier[o]
+        //si x es igual a 0 duplicar punto dos veces
+        if(x == 0){
+          lastPointX[o] = x
+          lastPointY[o] = result + viewPort.y    
+        }
+
+        //dibujar el segmento
+        line(lastPointX[o],lastPointY[o],x,result + viewPort.y)
+
+        lastPointX[o] = x
+        lastPointY[o] = result + viewPort.y
       }
-      pop()
-}
+    }
+    pop()
+  }
   
   // afterRender (encargado de dibujar puntos i en un futuro mas objetos de la interfaz)
   push()
@@ -412,7 +441,7 @@ function drawFunction() {
   }
   // -----------
 }
-
+  
 // estas variables se crean aqui para no estar creando y destruyendo variables locales en cada for
 // para optimizar
 let sign;
@@ -424,7 +453,7 @@ function evaluate(polinomi, x, y, vars) {
   
   // invierte el eje y porque el 0, 0 se encuentra en la esquina superior izquierda
   y *= -1;
-
+  
   // resta de bools que se traduce en un integer
   sign = polinomi.includes("+") - polinomi.includes("-");
 
