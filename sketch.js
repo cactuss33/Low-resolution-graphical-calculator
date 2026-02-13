@@ -381,15 +381,15 @@ function drawFunction() {
       textStyle(BOLD)
       text(
         i[1],
-        float(i[2][0]) + viewPort.x,
-        -float(i[2][1]) + viewPort.y + 20
+        float(i[2][0]) * zoom + viewPort.x,
+        -float(i[2][1]) * zoom + viewPort.y + 20
       )
       fill("#0060A7")
       // i[2] corresponde a una lista con coordenadas -> [40,80]
       stroke("black")
       circle(
-        float(i[2][0]) + viewPort.x,
-        -float(i[2][1]) + viewPort.y,
+        float(i[2][0]) * zoom + viewPort.x,
+        -float(i[2][1]) * zoom + viewPort.y,
         10
       )
       noStroke()
