@@ -70,6 +70,40 @@ input{
 .fila{
   display: flex;
   flex-direction: row;
-  align-items: center;
-  height: 44px;
+/*   align-items: center; */
+  height: auto;
+  width: 1000px;
+}
+.varDiv{
+/*   background-color: green; */
+  display: flex;
+  flex-direction: column;
+}
+
+.color {
+  width: 10px;
+  height: auto;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.color:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+
+.color:active {
+  transform: scale(0.95);
+}
+
+/* Chrome / Edge / Safari */
+.color::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 20px;
+  border-color: black;
 }
