@@ -7,7 +7,8 @@ let viewPort = { // camara
 };
 
 let zoom = 1
-let gridSize = 50
+let realGridSize = 50
+let gridSize;
 
 let polynomialFormula = [];
 let inputData = [
@@ -146,11 +147,11 @@ function draw() {
   if (keyIsDown(LEFT_ARROW)) viewPort.x += 4;
   if (keyIsDown(DOWN_ARROW)) viewPort.y -= 4;
   if (keyIsDown(UP_ARROW)) viewPort.y += 4;
-  if (keyIsDown(187) && zoom < 4) zoom += zoom/50;
+  if (keyIsDown(187) && zoom < 100) zoom += zoom/50;
   if (keyIsDown(189) && zoom > 0.1) zoom -= zoom/50;
   
   // ---------- loop ------------
-  gridSize = 50 * zoom
+  gridSize = realGridSize * zoom
   
   background(255);
   if(renderMode == 1){
