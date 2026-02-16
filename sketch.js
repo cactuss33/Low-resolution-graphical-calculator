@@ -14,7 +14,9 @@ let inputData = [
   [], // filas
   [], // inputs
   [], // etiquetas
-  [] // indicadores de tipo
+  [], // color
+  [], // div
+  [], // slider
 ]
 let variables = {};
 let slider;
@@ -46,30 +48,52 @@ function setup() {
   textSize(15)
 }
 function createNewInput(){
+  
   const fila = createDiv().addClass("fila");
-  fila.parent("pack"); 
-  
   const inputs = createInput();
-  inputs.parent(fila);
-  inputs.attribute('placeholder', '+')
-  
-  
   const lable = createP("");
-  lable.parent(fila);
+  const type = createColorPicker("black")
+  const varDiv = createDiv().addClass("varDiv")
+  const varSlider = createSlider(-10,10,0,0.01)
   
-  const type = createDiv()
+  //fila
+  fila.parent("pack");
+  
+  //colorpicker
   type.parent(fila)
+  type.class("color")
+  
+  //varDiv
+  varDiv.parent(fila)
+  
+  //input
+  inputs.parent(varDiv);
+  inputs.attribute('placeholder', '+')
+  inputs.input(processInput)
+  
+  //slider
+  const index = inputData[5].length
+  varSlider.parent(varDiv).hide()
+  varSlider.input( () => changeVarValue(index, varSlider.value()) )
+  
+  //lable
+  lable.parent(fila);
   
   inputData[0].push(fila)
   inputData[1].push(inputs)
   inputData[2].push(lable)
   inputData[3].push(type)
+  inputData[4].push(varDiv)
+  inputData[5].push(varSlider)
 }
 function removeInput(){
   if(inputData[0].length < 1) return
-  inputData[0].pop().remove(); // elimina div
-  inputData[1].pop().remove(); // elimina input
-  inputData[2].pop().remove(); // elimina botón
+  inputData[0].pop().remove();
+  inputData[1].pop().remove();
+  inputData[2].pop().remove();
+  inputData[3].pop().remove();
+  inputData[4].pop().remove();
+  inputData[5].pop().remove();
 }
 
 // mouse && camera
@@ -178,6 +202,7 @@ function keyPressed() {
     else if(showInfo == 1)
       showInfo = 0
   }
+  processInput()
 }
 
 
@@ -187,22 +212,13 @@ let lastFormula = "";
 let varName = "";
 let varValue = 0;
 let toRenderAfter = [];
-let skipRender = false;
 
-function drawFunction() {
-  // se encarga de dibujar un frame
+function processInput() {
   
-  // se reinician todas las variables
-  fact = slider.value();
   formula = [];
   polynomialFormula = [];
   variables = {};
   toRenderAfter = []
-  skipRender = false
-  
-  // como y neceesita ser tratada diferente con el modo que va fluido,
-  // se reinicia aqui el valor por el qual se multiplicara y al final
-  // si es que esto tiene sentido
   finalMultiplier = new Array(formula.length).fill(1)
   
   // extraer cada grupo de polinomios de cada input
@@ -216,9 +232,25 @@ function drawFunction() {
       lastFormula = lastFormula.slice(3);
       varName = lastFormula.replace(/[^a-zA-Z]/g, "").split("")[0];
       varValue = lastFormula.replace(/[^0-9.-]/g, "");
-      if (varName != undefined) variables[varName] = float(varValue);
-      skipRender = true;
+      
+      if(varName == undefined && lastFormula.length == 0)
+        varName = "z"
+         
+      if(varValue == "" && lastFormula.length == 0)
+        varValue = 0
+      
+      inputData[1][i].value("var " + varName + " = " + varValue)
+  
+      variables[varName] = float(varValue);
+      
+      if(inputData[5][i].value != varValue)
+        inputData[5][i].value(varValue)
+      
+      if (inputData[5][i].elt.style.display === 'none')
+        inputData[5][i].show(); 
     }
+    else if (inputData[5][i].elt.style.display !== 'none')
+      inputData[5][i].hide();
     
     // si contiene el prefijo "plot" tratar como un punto a dibujar
     if (lastFormula.slice(0, 4) == "plot") {
@@ -239,7 +271,6 @@ function drawFunction() {
       if(varValue.length == 2){
         toRenderAfter.push(["plot",varName,varValue])
       }
-      skipRender = true
     }
     
     // analizar formula
@@ -256,7 +287,7 @@ function drawFunction() {
           inputData[2][i].html("upToCreate")
       
       else if(polynomialFormula[i] == undefined)
-        inputData[2][i].html("incompleted formula")
+        inputData[2][i].html("undefined")
   
       else
         inputData[2][i].html(polynomialFormula[i].join(" "))
@@ -264,8 +295,19 @@ function drawFunction() {
     else
       inputData[2][i].html("")
   }
+}
+function changeVarValue(n, value){
+  lastFormula = inputData[1][n].value();
+  lastFormula = lastFormula.slice(3)
+  varName = lastFormula.replace(/[^a-zA-Z]/g, "").split("")[0];
+  inputData[1][n].value("var " + varName + " = " + value)  
+  processInput()
+}
 
 
+function drawFunction() {
+  // se encarga de dibujar un frame
+  
   // optimizacion
   let result = 0;
   let nextColor = 0;
@@ -275,7 +317,8 @@ function drawFunction() {
   
   // evaluacion por pixel ->
   if(renderMode == 0){ // --------------------------------------
-      // loop que recorre cada pixel
+    fact = slider.value();
+    // loop que recorre cada pixel
       // coord x -> coord y -> cada formula -> cada polinomio
       for (let x = 0; x < width; x += step) {
         // cada x
@@ -363,6 +406,8 @@ function drawFunction() {
         }
 
         //dibujar el segmento
+        stroke(inputData[3][o].color())
+        // console.log(inputData[3][0].color())
         line(lastPointX[o],lastPointY[o],x,result + viewPort.y)
 
         lastPointX[o] = x
@@ -372,18 +417,19 @@ function drawFunction() {
     pop()
   }
   
-  // afterRender (encargado de dibujar puntos i en un futuro mas objetos de la interfaz)
+  // afterRender (encargado de dibujar puntos y en un futuro mas objetos de la interfaz)
   push()
   for(let i of toRenderAfter){
     if(i[0] == "plot"){     
       fill("black")
       textAlign(CENTER)
       textStyle(BOLD)
-      text(
-        i[1],
-        float(i[2][0]) * zoom + viewPort.x,
-        -float(i[2][1]) * zoom + viewPort.y + 20
-      )
+      if(i[1] != undefined)
+        text(
+          i[1],
+          float(i[2][0]) * zoom + viewPort.x,
+          -float(i[2][1]) * zoom + viewPort.y + 20
+        )
       fill("#0060A7")
       // i[2] corresponde a una lista con coordenadas -> [40,80]
       stroke("black")
@@ -499,7 +545,7 @@ function evaluate(polinomi, x, y, vars) {
   return number;
 }
 
-// estas variables se crean aqui para no estar creando y destruyendo variables locales en cada for
+// estas variables se crean aqui para no estar creando y destruyendo variables locales en cada "for"
 // para optimizar
 let segments;
 let currentEval;
