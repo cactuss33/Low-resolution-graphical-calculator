@@ -61,16 +61,17 @@ html, body {
 
 p {
   white-space: nowrap;
+  height: 10px;
 }
 
 input{
-  margin-right:10px;
+  margin-right:5px;
+/*   margin-left: 0px; */
 }
 
 .fila{
   display: flex;
   flex-direction: row;
-/*   align-items: center; */
   height: auto;
   width: 1000px;
 }
