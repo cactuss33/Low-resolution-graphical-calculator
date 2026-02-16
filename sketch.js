@@ -61,7 +61,7 @@ function createNewInput(){
   
   //colorpicker
   type.parent(fila)
-  type.class("color")
+  type.class("color").hide()
   
   //varDiv
   varDiv.parent(fila)
@@ -280,11 +280,19 @@ function processInput() {
     // si polynomialFormula es undefined, set to ""
     if (polynomialFormula[polynomialFormula.length - 1] == "undefined")
       polynomialFormula[polynomialFormula.length - 1] = "";
+
+    if(polynomialFormula[i] == undefined){
+      if (inputData[3][i].elt.style.display !== 'none')
+        inputData[3][i].hide();
+    }else{
+      if (inputData[3][i].elt.style.display === 'none')
+        inputData[3][i].show(); 
+    }
     
     // actualizar la etiqueta que muestra la evaluacion de la formula (si es debido)
     if(showInfo == 1){
       if(i == inputData[2].length - 1)
-          inputData[2][i].html("upToCreate")
+        inputData[2][i].html("upToCreate")
       
       else if(polynomialFormula[i] == undefined)
         inputData[2][i].html("undefined")
@@ -296,6 +304,7 @@ function processInput() {
       inputData[2][i].html("")
   }
 }
+
 function changeVarValue(n, value){
   lastFormula = inputData[1][n].value();
   lastFormula = lastFormula.slice(3)
@@ -303,7 +312,6 @@ function changeVarValue(n, value){
   inputData[1][n].value("var " + varName + " = " + value)  
   processInput()
 }
-
 
 function drawFunction() {
   // se encarga de dibujar un frame
@@ -447,6 +455,7 @@ function drawFunction() {
   // mostrar informacion
   if(showInfo == 1){
     textAlign(RIGHT)
+    noStroke()
     fill("black");
     i = 10
     text(
