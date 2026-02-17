@@ -224,12 +224,14 @@ function processInput() {
   
   // extraer cada grupo de polinomios de cada input
   for (let i = 0; i < inputData[1].length; i++) {
+    let inputType = ""
     // operar cada input
     lastFormula = inputData[1][i].value();
     formula.push(lastFormula); // carga en formula los valores
 
     // si contiene el prefijo "var" tratar como una variable y skippear el "analisis" de la formula
     if (lastFormula.slice(0, 3) == "var") {
+      inputType = "var"
       lastFormula = lastFormula.slice(3);
       varName = lastFormula.replace(/[^a-zA-Z]/g, "").split("")[0];
       varValue = lastFormula.replace(/[^0-9.-]/g, "");
@@ -255,22 +257,33 @@ function processInput() {
     
     // si contiene el prefijo "plot" tratar como un punto a dibujar
     if (lastFormula.slice(0, 4) == "plot") {
-      lastFormula = lastFormula.slice(4);
-      varName = lastFormula.replace(/[^a-zA-Z]/g, "").split("").join("");
-      varValue = lastFormula.replace(/[^0-9.,-]/g, "").split(",");
+      inputType = "plot"
       
-      if (varName != undefined)
-        variables[varName] = float(varValue); 
+      lastFormula = lastFormula.slice(4);
+      varName = lastFormula.split("=")[0].replace(/[^a-zA-Z]/g, "").split("").join("");
+      varValue = [0,0]
+      if(lastFormula.includes("(") && lastFormula.includes(")"))
+        varValue = lastFormula.split("(")[1].split(")")[0].split(",");
+      
       if(inputData[1][i].elt === document.activeElement){
         if(varName == "" && varValue.length == 1)
           varName = "point"
         if(varValue.length != 2)
           varValue = [0,0]
       }
+      
+      // recomponer la sintaxi
       inputData[1][i].value("plot " + varName + " = (" + varValue[0] + "," + varValue[1] + ")")
         
       if(varValue.length == 2){
-        toRenderAfter.push(["plot",varName,varValue])
+        varValue = [formulaToPolynomial(String(varValue[0]), i), formulaToPolynomial(String(varValue[1]), i)]
+        
+        toRenderAfter.push({
+          type: "plot",
+          id: i,
+          name: varName,
+          value: varValue
+        })
       }
     }
     
@@ -282,12 +295,13 @@ function processInput() {
     if (polynomialFormula[polynomialFormula.length - 1] == "undefined")
       polynomialFormula[polynomialFormula.length - 1] = "";
 
-    if(polynomialFormula[i] == undefined){
-      if (inputData[3][i].elt.style.display !== 'none')
-        inputData[3][i].hide();
-    }else{
+    // controlar si el selector de color esta visible o no
+    if(inputType == "plot" || inputType == "" && polynomialFormula[i] != undefined){
       if (inputData[3][i].elt.style.display === 'none')
         inputData[3][i].show(); 
+    }else{
+      if (inputData[3][i].elt.style.display !== 'none')
+        inputData[3][i].hide();
     }
     
     // actualizar la etiqueta que muestra la evaluacion de la formula (si es debido)
@@ -387,7 +401,7 @@ function drawFunction() {
       //recorrer cada formula
       for (let o = 0; o < polynomialFormula.length; o++) {
         
-        if(polynomialFormula[o] == undefined){
+        if(finalMultiplier == ""){
           continue
         }
         result = 0;
@@ -428,27 +442,56 @@ function drawFunction() {
   
   // afterRender (encargado de dibujar puntos y en un futuro mas objetos de la interfaz)
   push()
+  let incomingY,incomingX;
   for(let i of toRenderAfter){
-    if(i[0] == "plot"){     
-      fill("black")
+    if(i.type == "plot"){     
+      
+      result = 0;
+      for (let u = 0; u < i.value[0].length; u++) {
+        // cada polinomio
+        result += evaluate(
+          i.value[0][u],
+          0,
+          0,
+          { ...variables } // pasa una copia
+        );
+      }
+      incomingX = result
+      
+      result = 0;
+      for (let u = 0; u < i.value[1].length; u++) {
+        // cada polinomio
+        result += evaluate(
+          i.value[1][u],
+          0,
+          0,
+          { ...variables } // pasa una copia
+        );
+      }
+      incomingY = result
+      
       textAlign(CENTER)
       textStyle(BOLD)
-      if(i[1] != undefined)
+      textSize(20)
+      strokeWeight(2)
+      //i.id es la id
+      fill(inputData[3][i.id].color())
+      stroke("white")
+      if(i.name != undefined)
         text(
-          i[1],
-          float(i[2][0]) * zoom + viewPort.x,
-          -float(i[2][1]) * zoom + viewPort.y + 20
+          i.name,
+          float(incomingX) * zoom + viewPort.x,
+          -float(incomingY) * zoom + viewPort.y + 30
         )
-      fill("#0060A7")
-      // i[2] corresponde a una lista con coordenadas -> [40,80]
-      stroke("black")
+      // i.value corresponde a una lista con coordenadas -> [40,80]
+      // stroke("black")
       circle(
-        float(i[2][0]) * zoom + viewPort.x,
-        -float(i[2][1]) * zoom + viewPort.y,
-        10
+        float(incomingX) * zoom + viewPort.x,
+        -float(incomingY) * zoom + viewPort.y,
+        15
       )
       noStroke()
-      // console.log("wanna draw a point at: " + i[2] + ", with the name: " + i[1])   
+      // console.log("wanna draw a point at: " + i.value + ", with the name: " + i.name)   
     }
   }
   pop()
@@ -594,7 +637,6 @@ function formulaToPolynomial(formula, index = 1) {
   
   if(renderMode == 0){
     return segments[0];
-    
   }
   if(renderMode == 1){
     yPolynoms = []
@@ -617,7 +659,7 @@ function formulaToPolynomial(formula, index = 1) {
       number = float(yPolynoms[0].replace(/\D/g, ""));
       if (Number.isNaN(number)) number = 1;
       finalMultiplier[index] = number
-      return(segments[0])
     }
+    return(segments[0])
   }
 }
