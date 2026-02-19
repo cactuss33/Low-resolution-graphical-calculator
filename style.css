@@ -6,24 +6,25 @@ html, body {
   overflow: hidden;
 }
 
+
 #pack {
   position: absolute;
   top: 0;
   left: 0;
-  max-width: 250px;
-  padding: 10px;
+  max-width: 375px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
 #pack input[type="text"] {
-  width: 25px;
-  height: 30px;
-  padding: 6px 10px;            
-  border: 2px solid #333;       
-  border-radius: 6px;           
-  font-size: 20px;
+  width: 37.5px;
+  height: 45px;
+  padding: 9px 15px;            
+  border: 3px solid #333;       
+  border-radius: 9px;           
+  font-size: 30px;
   text-align: center;           
   outline: none;
   background: #f0f0f0;         
@@ -38,13 +39,13 @@ html, body {
 #pack input[type="text"]:hover,
 #pack input[type="text"]:focus,
 #pack input[type="text"]:not(:placeholder-shown) {
-  width: 220px;                
+  width: 330px;                
   text-align: left;             
 }
 
 #pack input[type="text"]:focus {
   border-color: #0B233D;
-  box-shadow: 0 0 5px #1E1F1E;
+  box-shadow: 0 0 7.5px #1E1F1E;
 }
 
 /* placeholder normal */
@@ -61,11 +62,11 @@ html, body {
 
 p {
   white-space: nowrap;
-  height: 10px;
+  height: 15px;
 }
 
 input{
-  margin-right:5px;
+  margin-right:7.5px;
 /*   margin-left: 0px; */
 }
 
@@ -73,7 +74,7 @@ input{
   display: flex;
   flex-direction: row;
   height: auto;
-  width: 1000px;
+  width: 1500px;
 }
 .varDiv{
 /*   background-color: green; */
@@ -82,20 +83,20 @@ input{
 }
 
 .color {
-  width: 10px;
+  width: 15px;
   height: auto;
   padding: 0;
   border: none;
-  border-radius: 5px;
+  border-radius: 7.5px;
   background: none;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .color:hover {
   transform: scale(1.08);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  box-shadow: 0 9px 21px rgba(0,0,0,0.25);
 }
 
 .color:active {
@@ -105,6 +106,6 @@ input{
 /* Chrome / Edge / Safari */
 .color::-webkit-color-swatch-wrapper {
   padding: 0;
-  border-radius: 20px;
+  border-radius: 35px;
   border-color: black;
 }
