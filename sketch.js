@@ -25,8 +25,8 @@ let variables = {};
 let slider;
 
 let renderModeDescription = [
-  "general equations (chunky)",
-  "smooth curves (continuous)"
+  "any equation (chunky)",
+  "smooth limited (continuous)"
 ]
 
 // el valor por el cual "y" se multiplica antes de renderizar
@@ -49,7 +49,50 @@ function setup() {
   
   noStroke();
   textSize(15)
+  
+  
+  
+  // "cookies" (no son cookies) ---------------
+  if(getItem("userWasHereBefore")){
+    console.log("user was here before")
+    loadUserData()
+  }else{
+    console.log("user is new")
+    storeItem("userWasHereBefore", "true")
+  }
+  
+  
 }
+let userData = []
+function saveUserData(){
+  userData = []
+  for(let i of inputData[1]){
+    userData.push(i.value())
+  }
+  console.log(userData)
+  storeItem("userData", JSON.stringify(userData))
+}
+function loadUserData(){
+  userData = JSON.parse(getItem("userData"))
+  if(userData.length == 0) userData = [""]
+  
+  while(inputData[0].length != 0){
+    removeInput()
+  }
+  
+  for(let i of userData){
+    createNewInput()
+  }
+  for(let i in inputData[1]){
+    inputData[1][i].value(userData[i])
+  }
+  processInput()
+}
+
+window.addEventListener("beforeunload", () => {
+  saveUserData()
+})
+
 function createNewInput(){
   
   const fila = createDiv().addClass("fila");
@@ -149,10 +192,10 @@ function draw() {
   if (keyIsDown(LEFT_ARROW)) viewPort.x += 4;
   if (keyIsDown(DOWN_ARROW)) viewPort.y -= 4;
   if (keyIsDown(UP_ARROW)) viewPort.y += 4;
-  if (keyIsDown(187) && zoom < 100) zoom += zoom/50;
-  if (keyIsDown(189) && zoom > 0.1) zoom -= zoom/50;
+  if (keyIsDown(187) && zoom < 200) zoom += zoom/50;
+  if (keyIsDown(189) && zoom > 0.01) zoom -= zoom/50;
   
-  // ---------- loop ------------
+  // ---------- loop -------------------------------------------------
   realGridSize = 128 * (1 / Math.pow(2, Math.round(Math.log2(zoom))))
   gridSize = realGridSize * zoom
   
@@ -160,6 +203,7 @@ function draw() {
   if(renderMode == 1){
     stroke("black")
     strokeWeight(0.4)
+    textAlign(LEFT)
     for(let x = 0; x < width + 50; x += gridSize){
       line(
         x + (viewPort.x % gridSize),
@@ -168,7 +212,7 @@ function draw() {
         height
       )
       text(
-        round((x + (viewPort.x % gridSize) - viewPort.x ) / zoom),
+        round((x + (viewPort.x % gridSize) - viewPort.x ) / zoom * 100) / 100,
         x + (viewPort.x % gridSize) + 10,
         viewPort.y - 10
       )
@@ -181,7 +225,7 @@ function draw() {
         y + (viewPort.y % gridSize)
       )
       text(
-        -round((y + (viewPort.y % gridSize) - viewPort.y ) / zoom),
+        -round((y + (viewPort.y % gridSize) - viewPort.y ) / zoom * 100) / 100,
         viewPort.x + 10,
         y + (viewPort.y % gridSize) - 10
       )
@@ -189,7 +233,7 @@ function draw() {
   }
 
   drawFunction();
-  // ----------------------------
+  // -----------------------------------------------------------------
   
   // crear nuevo input al ver que el ultimo ya esta lleno
   if(inputData[1][inputData[1].length - 1].value() != ""){
@@ -218,7 +262,6 @@ function keyPressed() {
   }
   processInput()
 }
-
 
 // estas variables se crean aqui para no estar creando y destruyendo variables locales en cada for
 // para optimizar
@@ -554,6 +597,9 @@ function drawFunction() {
   // -----------
 }
   
+  
+// ------------ procesamiento de formulas ------------------
+
 // estas variables se crean aqui para no estar creando y destruyendo variables locales en cada for
 // para optimizar
 let sign;
