@@ -61,7 +61,7 @@ function setup() {
     console.log("user is new")
     storeItem("userWasHereBefore", "true")
     inputData[1][0].attribute("placeholder", "type here your formula")
-    inputData[1][0].size(200)
+    inputData[1][0].size(300)
   }
   
   
