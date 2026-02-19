@@ -36,6 +36,7 @@ let renderMode = 1
 let showInfo = 0
 
 function setup() {
+  console.log("setup")
   createCanvas(windowWidth, windowHeight);
   background(255);
   
@@ -49,8 +50,8 @@ function setup() {
   
   noStroke();
   textSize(15)
-  
-  
+  realGridSize = 128 * (1 / Math.pow(2, Math.round(Math.log2(zoom))))
+  gridSize = realGridSize * zoom
   
   // "cookies" (no son cookies) ---------------
   if(getItem("userWasHereBefore")){
@@ -197,12 +198,14 @@ function draw() {
   if (keyIsDown(LEFT_ARROW)) viewPort.x += 4;
   if (keyIsDown(DOWN_ARROW)) viewPort.y -= 4;
   if (keyIsDown(UP_ARROW)) viewPort.y += 4;
-  if (keyIsDown(187) && zoom < 200) zoom += zoom/50;
-  if (keyIsDown(189) && zoom > 0.01) zoom -= zoom/50;
-  
+  if (keyIsDown(187) && zoom < 200) zoom += (zoom/50) / (1000 / deltaTime / 60);
+  if (keyIsDown(189) && zoom > 0.01) zoom -= (zoom/50) / (1000 / deltaTime / 60)
+    
   // ---------- loop -------------------------------------------------
-  realGridSize = 128 * (1 / Math.pow(2, Math.round(Math.log2(zoom))))
-  gridSize = realGridSize * zoom
+  if (keyIsDown(187) || keyIsDown(189)){
+    realGridSize = 128 * (1 / Math.pow(2, Math.round(Math.log2(zoom))))
+    gridSize = realGridSize * zoom
+  }
   
   background(255);
   if(renderMode == 1){
@@ -265,7 +268,6 @@ function keyPressed() {
     else if(showInfo == 1)
       showInfo = 0
   }
-  processInput()
 }
 
 // estas variables se crean aqui para no estar creando y destruyendo variables locales en cada for
@@ -276,6 +278,7 @@ let varValue = 0;
 let toRenderAfter = [];
 
 function processInput() {
+  console.log("processInput")
   
   formula = [];
   polynomialFormula = [];
@@ -706,28 +709,27 @@ function formulaToPolynomial(formula, index = 1) {
   if(renderMode == 0){
     return segments[0];
   }
-  if(renderMode == 1){
-    yPolynoms = []
-    for(let i in segments[0]){
-      if(segments[0][i].includes("y")){
-        yPolynoms.push(segments[0][i])
-        segments[0].splice(i, 1)
-      }
+  
+  yPolynoms = []
+  for(let i in segments[0]){
+    if(segments[0][i].includes("y")){
+      yPolynoms.push(segments[0][i])
+      segments[0].splice(i, 1)
     }
-    if(yPolynoms != "" && yPolynoms[0].includes("-")){
-      for(let i in segments[0]){
-        currentEval = segments[0][i]
-        if (currentEval[0] == "-") currentEval = "+" + currentEval.slice(1);
-        else if (currentEval[0] == "+") currentEval = "-" + currentEval.slice(1);
-        else currentEval = "-" + currentEval;
-        segments[0][i] = currentEval
-      }
-    }
-    if(yPolynoms != ""){
-      number = float(yPolynoms[0].replace(/\D/g, ""));
-      if (Number.isNaN(number)) number = 1;
-      finalMultiplier[index] = number
-    }
-    return(segments[0])
   }
+  if(yPolynoms != "" && yPolynoms[0].includes("-")){
+    for(let i in segments[0]){
+      currentEval = segments[0][i]
+      if (currentEval[0] == "-") currentEval = "+" + currentEval.slice(1);
+      else if (currentEval[0] == "+") currentEval = "-" + currentEval.slice(1);
+      else currentEval = "-" + currentEval;
+      segments[0][i] = currentEval
+    }
+  }
+  if(yPolynoms != ""){
+    number = float(yPolynoms[0].replace(/\D/g, ""));
+    if (Number.isNaN(number)) number = 1;
+    finalMultiplier[index] = number
+  }
+  return(segments[0])
 }
