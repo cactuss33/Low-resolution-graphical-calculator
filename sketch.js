@@ -6,6 +6,8 @@ let viewPort = { // camara
   y: 0,
 };
 
+let plotCircleSize = 30
+
 let zoom = 1
 let realGridSize = 50
 let gridSize;
@@ -151,6 +153,7 @@ function draw() {
   if (keyIsDown(189) && zoom > 0.1) zoom -= zoom/50;
   
   // ---------- loop ------------
+  realGridSize = 128 * (1 / Math.pow(2, Math.round(Math.log2(zoom))))
   gridSize = realGridSize * zoom
   
   background(255);
@@ -164,6 +167,11 @@ function draw() {
         x + (viewPort.x % gridSize),
         height
       )
+      text(
+        round((x + (viewPort.x % gridSize) - viewPort.x ) / zoom),
+        x + (viewPort.x % gridSize) + 10,
+        viewPort.y - 10
+      )
     }
     for(let y = 0; y < height + 50; y += gridSize){
       line(
@@ -171,6 +179,11 @@ function draw() {
         y + (viewPort.y % gridSize),
         width,
         y + (viewPort.y % gridSize)
+      )
+      text(
+        -round((y + (viewPort.y % gridSize) - viewPort.y ) / zoom),
+        viewPort.x + 10,
+        y + (viewPort.y % gridSize) - 10
       )
     }
   }
@@ -488,7 +501,7 @@ function drawFunction() {
       circle(
         float(incomingX) * zoom + viewPort.x,
         -float(incomingY) * zoom + viewPort.y,
-        15
+        plotCircleSize
       )
       noStroke()
       // console.log("wanna draw a point at: " + i.value + ", with the name: " + i.name)   
