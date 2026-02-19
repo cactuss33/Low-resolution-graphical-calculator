@@ -59,6 +59,8 @@ function setup() {
   }else{
     console.log("user is new")
     storeItem("userWasHereBefore", "true")
+    inputData[1][0].attribute("placeholder", "type here your formula")
+    inputData[1][0].size(200)
   }
   
   
