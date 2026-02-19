@@ -65,6 +65,7 @@ function setup() {
 }
 let userData = []
 function saveUserData(){
+  console.log("SAVING...")
   userData = []
   for(let i of inputData[1]){
     userData.push(i.value())
@@ -73,6 +74,7 @@ function saveUserData(){
   storeItem("userData", JSON.stringify(userData))
 }
 function loadUserData(){
+  console.log("LOADING...")
   userData = JSON.parse(getItem("userData"))
   if(userData.length == 0) userData = [""]
   
@@ -94,7 +96,7 @@ window.addEventListener("beforeunload", () => {
 })
 
 function createNewInput(){
-  
+  console.log("new input is being created")
   const fila = createDiv().addClass("fila");
   const inputs = createInput();
   const lable = createP("");
@@ -133,6 +135,7 @@ function createNewInput(){
   inputData[5].push(varSlider)
 }
 function removeInput(){
+  console.log("new input is being removed")
   if(inputData[0].length < 1) return
   inputData[0].pop().remove();
   inputData[1].pop().remove();
@@ -396,6 +399,7 @@ function drawFunction() {
   
   // evaluacion por pixel ->
   if(renderMode == 0){ // --------------------------------------
+    console.log("using old render")
     fact = slider.value();
     // loop que recorre cada pixel
       // coord x -> coord y -> cada formula -> cada polinomio
@@ -406,6 +410,7 @@ function drawFunction() {
           for (let o = 0; o < polynomialFormula.length; o++) {
             // cada formula indiv
             
+            let copyVariables = {...variables}
             result = 0;
             for (let i = 0; i < polynomialFormula[o].length; i++) {
               // cada polinomio
@@ -413,7 +418,7 @@ function drawFunction() {
                 polynomialFormula[o][i],
                 x - viewPort.x,
                 y - viewPort.y,
-                { ...variables } // pasa una copia
+                copyVariables
               );
             }
 
@@ -457,11 +462,12 @@ function drawFunction() {
       //recorrer cada formula
       for (let o = 0; o < polynomialFormula.length; o++) {
         
-        if(finalMultiplier == ""){
+        if(finalMultiplier[o] == "" || finalMultiplier[o] == undefined){
           continue
         }
+        let copyVariables = {...variables}
         result = 0;
-
+          
         // cada formula indiv
         for (let i = 0; i < polynomialFormula[o].length; i++) {
           // cada polinomio
@@ -469,7 +475,7 @@ function drawFunction() {
             polynomialFormula[o][i],
             (x - viewPort.x) / zoom,
             0,
-            { ...variables } // pasa una copia
+            copyVariables // pasa una copia
           );
         }
 
@@ -502,6 +508,7 @@ function drawFunction() {
   for(let i of toRenderAfter){
     if(i.type == "plot"){     
       
+      let copyVariables = {...variables}
       result = 0;
       for (let u = 0; u < i.value[0].length; u++) {
         // cada polinomio
@@ -509,11 +516,12 @@ function drawFunction() {
           i.value[0][u],
           0,
           0,
-          { ...variables } // pasa una copia
+          copyVariables
         );
       }
       incomingX = result
       
+      copyVariables = {...variables}
       result = 0;
       for (let u = 0; u < i.value[1].length; u++) {
         // cada polinomio
@@ -521,7 +529,7 @@ function drawFunction() {
           i.value[1][u],
           0,
           0,
-          { ...variables } // pasa una copia
+          copyVariables
         );
       }
       incomingY = result
@@ -604,7 +612,6 @@ function drawFunction() {
 // para optimizar
 let sign;
 let number;
-
 function evaluate(polinomi, x, y, vars) { 
   // esta funcion se encarga de evaluar el valor de un solo polinomio
   // le pasas la x, y a evaluar y el objeto {vars} que contiene un diccionario con el valor de las variables creadas por el usuario
