@@ -91,7 +91,7 @@ input{
   background-color: transparent;
   border-color: transparent;
   position: relative;
-  background-image: url("CLOSEBUTTON.png");
+  background-image: url("assets/closebutton.png");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
