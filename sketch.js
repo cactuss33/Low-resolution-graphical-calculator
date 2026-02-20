@@ -455,7 +455,7 @@ function drawFunction() {
     strokeWeight(0.4);
 
     //dibujar eje de cordenadas
-    strokeWeight(10);
+    strokeWeight(4);
     stroke("rgb(89,141,89)");
     line(viewPort.x, 0, viewPort.x, height);
     line(0, viewPort.y, width, viewPort.y);
