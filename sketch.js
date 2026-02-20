@@ -22,6 +22,7 @@ let inputData = [
   [], // color
   [], // div
   [], // slider
+  [], // boton de cerrar
 ];
 let variables = {};
 let slider;
@@ -48,6 +49,7 @@ function setup() {
   };
 
   createNewInput();
+  inputData[6][0].hide()
   slider = createSlider(0.1, 10, 10, 0.1);
 
   noStroke();
@@ -91,6 +93,7 @@ function loadUserData() {
   for (let i in inputData[1]) {
     inputData[1][i].value(userData[i]);
   }
+  activateCorrectCloseButtons()
   processInput();
 }
 
@@ -107,6 +110,9 @@ function createNewInput() {
   const varDiv = createDiv().addClass("varDiv");
   const varSlider = createSlider(-10, 10, 0, 0.01);
 
+  const closeButton = createButton("")
+  
+  
   //fila
   fila.parent("pack");
 
@@ -130,22 +136,46 @@ function createNewInput() {
   //lable
   lable.parent(fila);
 
+  //boton de cerrar
+  const indexB = inputData[6].length;
+  closeButton.parent(fila)
+  closeButton.class("closeButton")
+  closeButton.mousePressed(() => removeInput(indexB))
+  
   inputData[0].push(fila);
   inputData[1].push(inputs);
   inputData[2].push(lable);
   inputData[3].push(type);
   inputData[4].push(varDiv);
   inputData[5].push(varSlider);
+  inputData[6].push(closeButton);
 }
-function removeInput() {
-  console.log("new input is being removed");
+function removeInput(index = "last") {
   if (inputData[0].length < 1) return;
-  inputData[0].pop().remove();
-  inputData[1].pop().remove();
-  inputData[2].pop().remove();
-  inputData[3].pop().remove();
-  inputData[4].pop().remove();
-  inputData[5].pop().remove();
+  if (index == inputData[0].length - 1) return;
+  console.log("new input is being removed");
+  if(index == "last"){
+    inputData[0].pop().remove();
+    inputData[1].pop().remove();
+    inputData[2].pop().remove();
+    inputData[3].pop().remove();
+    inputData[4].pop().remove();
+    inputData[5].pop().remove();
+    inputData[6].pop().remove();
+  }else{
+    console.log(index)
+    inputData[0].splice(index,1)[0].remove();
+    inputData[1].splice(index,1)[0].remove();
+    inputData[2].splice(index,1)[0].remove();
+    inputData[3].splice(index,1)[0].remove();
+    inputData[4].splice(index,1)[0].remove();
+    inputData[5].splice(index,1)[0].remove();
+    inputData[6].splice(index,1)[0].remove();
+    for(let i = index; i < inputData[0].length; i ++){
+      inputData[6][i].mousePressed(() => removeInput(i))
+    }
+    processInput()
+  }
 }
 
 // mouse && camera
@@ -208,7 +238,8 @@ function draw() {
   if (keyIsDown(LEFT_ARROW)) viewPort.x += 4;
   if (keyIsDown(DOWN_ARROW)) viewPort.y -= 4;
   if (keyIsDown(UP_ARROW)) viewPort.y += 4;
-  if (keyIsDown(187) && zoom < 200) zoom += zoom / 50 / (1000 / deltaTime / 60);
+  if (keyIsDown(187) && zoom < 200)
+    zoom += zoom / 50 / (1000 / deltaTime / 60);
   if (keyIsDown(189) && zoom > 0.01)
     zoom -= zoom / 50 / (1000 / deltaTime / 60);
 
@@ -246,19 +277,29 @@ function draw() {
   // -----------------------------------------------------------------
 
   // crear nuevo input al ver que el ultimo ya esta lleno
-  if (inputData[1][inputData[1].length - 1].value() != "") {
+  if (inputData[1][inputData[1].length - 1].value() != ""){
     createNewInput();
+    activateCorrectCloseButtons()
   }
   // eliminar input
-  if (
-    inputData[0].length > 1 &&
-    inputData[1][inputData[1].length - 2].value() == ""
-  ) {
+  if (inputData[0].length > 1 && inputData[1][inputData[1].length - 2].value() == ""){
     removeInput();
+    activateCorrectCloseButtons()
   }
   // textAlign(BOTTOM)
   text(round(fixzoom * 5),10,height - 10)
 }
+
+function activateCorrectCloseButtons(){
+  let lastInputIndex = inputData[6].length
+  for(let i = 0; i < lastInputIndex; i ++){
+    if(i == lastInputIndex - 1)
+      inputData[6][i].hide()
+    else
+      inputData[6][i].show()
+  }
+}
+
 function keyPressed() {
   if (key == "Escape") {
     document.activeElement.blur();
