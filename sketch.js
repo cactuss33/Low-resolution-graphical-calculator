@@ -155,22 +155,42 @@ function removeInput(index = "last") {
   if (index == inputData[0].length - 1) return;
   console.log("new input is being removed");
   if(index == "last"){
-    inputData[0].pop().remove();
-    inputData[1].pop().remove();
-    inputData[2].pop().remove();
-    inputData[3].pop().remove();
-    inputData[4].pop().remove();
-    inputData[5].pop().remove();
-    inputData[6].pop().remove();
+    const fila = inputData[0].pop()
+    const inputs = inputData[1].pop()
+    const lable = inputData[2].pop()
+    const type = inputData[3].pop()
+    const varDiv = inputData[4].pop()
+    const varSlider = inputData[5].pop()
+    const closeButton = inputData[6].pop()
+    
+    fila.remove();
+    inputs.remove();
+    lable.remove();
+    type.remove();
+    varDiv.remove();
+    varSlider.remove();
+    closeButton.remove();
+    
   }else{
-    console.log(index)
-    inputData[0].splice(index,1)[0].remove();
-    inputData[1].splice(index,1)[0].remove();
-    inputData[2].splice(index,1)[0].remove();
-    inputData[3].splice(index,1)[0].remove();
-    inputData[4].splice(index,1)[0].remove();
-    inputData[5].splice(index,1)[0].remove();
-    inputData[6].splice(index,1)[0].remove();
+    const fila = inputData[0].splice(index,1)[0]
+    const inputs = inputData[1].splice(index,1)[0]
+    const lable = inputData[2].splice(index,1)[0]
+    const type = inputData[3].splice(index,1)[0]
+    const varDiv = inputData[4].splice(index,1)[0]
+    const varSlider = inputData[5].splice(index,1)[0]
+    const closeButton = inputData[6].splice(index,1)[0]
+    
+    fila.elt.style.transform = "translateX(-100vw)"
+    setTimeout(() => { 
+      fila.remove();
+      inputs.remove();
+      lable.remove();
+      type.remove();
+      varDiv.remove();
+      varSlider.remove();
+      closeButton.remove();
+    }, 350)
+    
     for(let i = index; i < inputData[0].length; i ++){
       inputData[6][i].mousePressed(() => removeInput(i))
     }
