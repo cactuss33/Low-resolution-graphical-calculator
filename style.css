@@ -74,12 +74,13 @@ input{
 .fila{
   display: flex;
   flex-direction: row;
-  height: auto;
   width: 100vw;
-/*   background-color: orange; */
+  min-height: auto;
+  overflow: hidden;
+  transition: height 0.35s ease, opacity 0.25s ease, transform 0.25s ease;
 }
+
 .varDiv{
-/*   background-color: green; */
   display: flex;
   flex-direction: column;
 /*   background-color: green; */
