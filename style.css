@@ -1,9 +1,11 @@
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
+  touch-action: pan-y; /* permite solo scroll vertical */
 }
 
 
@@ -16,32 +18,28 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 15px;
-/*   background-color: blue; */
+  /*   background-color: blue; */
 }
 
 #pack input[type="text"] {
   width: 37.5px;
   height: 45px;
-  padding: 9px 15px;            
-  border: 3px solid #333;       
-  border-radius: 9px;           
+  padding: 9px 15px;
+  border: 3px solid #333;
+  border-radius: 9px;
   font-size: 30px;
-  text-align: center;           
+  text-align: center;
   outline: none;
-  background: #f0f0f0;         
-  transition: 
-    width 0.3s, 
-    text-align 0.3s, 
-    border-color 0.2s, 
-    box-shadow 0.2s,
+  background: #f0f0f0;
+  transition: width 0.3s, text-align 0.3s, border-color 0.2s, box-shadow 0.2s,
     opacity 0.2s;
 }
 
 #pack input[type="text"]:hover,
 #pack input[type="text"]:focus,
 #pack input[type="text"]:not(:placeholder-shown) {
-  width: 330px;                
-  text-align: left;             
+  width: 330px;
+  text-align: left;
 }
 
 #pack input[type="text"]:focus {
@@ -66,12 +64,12 @@ p {
   height: 15px;
 }
 
-input{
-  margin-right:7.5px;
-/*   margin-left: 0px; */
+input {
+  margin-right: 7.5px;
+  /*   margin-left: 0px; */
 }
 
-.fila{
+.fila {
   display: flex;
   flex-direction: row;
   width: 100vw;
@@ -80,13 +78,13 @@ input{
   transition: height 0.35s ease, opacity 0.25s ease, transform 0.25s ease;
 }
 
-.varDiv{
+.varDiv {
   display: flex;
   flex-direction: column;
-/*   background-color: green; */
+  /*   background-color: green; */
 }
 
-.closeButton{
+.closeButton {
   width: 20px;
   height: 20px;
   background-color: transparent;
@@ -100,7 +98,7 @@ input{
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.closeButton:hover{
+.closeButton:hover {
   transform: scale(1.2);
   opacity: 1;
 }
@@ -113,13 +111,13 @@ input{
   border-radius: 7.5px;
   background: none;
   cursor: pointer;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .color:hover {
   transform: scale(1.08);
-  box-shadow: 0 9px 21px rgba(0,0,0,0.25);
+  box-shadow: 0 9px 21px rgba(0, 0, 0, 0.25);
 }
 
 .color:active {
