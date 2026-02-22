@@ -286,7 +286,7 @@ function draw() {
     for (let y = 0; y < height + 50; y += gridSize) {
       line(0, y + (viewPort.y % gridSize), width, y + (viewPort.y % gridSize));
       text(
-        -round(((y + (viewPort.y % gridSize) - viewPort.y) / zoom) * 100) / 100,
+        -round(((y + (viewPort.y % gridSize) - viewPort.y) / zoom) * 1000) / 1000,
         viewPort.x + 10,
         y + (viewPort.y % gridSize) - 10
       );
