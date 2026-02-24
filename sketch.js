@@ -286,7 +286,7 @@ function draw() {
     for (let y = 0; y < height + 50; y += gridSize) {
       line(0, y + (viewPort.y % gridSize), width, y + (viewPort.y % gridSize));
       text(
-        -round(((y + (viewPort.y % gridSize) - viewPort.y) / zoom) * 1000) / 1000,
+        -round(((y + (viewPort.y % gridSize) - viewPort.y) / zoom) * 100) / 100,
         viewPort.x + 10,
         y + (viewPort.y % gridSize) - 10
       );
@@ -346,7 +346,7 @@ function processInput() {
 
   formula = [];
   polynomialFormula = [];
-  variables = {};
+  variables = {e: 2.7182818284590452353602874713526624977572470936999595749669676277240766303535475945713821785251664274};
   toRenderAfter = [];
   finalMultiplier = new Array(formula.length).fill(1);
 
