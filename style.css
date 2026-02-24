@@ -8,9 +8,25 @@ body {
   touch-action: pan-y; /* permite solo scroll vertical */
 }
 
+#cabecera {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;            /* Mejor que 100vw */
+  height: 30px;           /* Ajusta según tu contenido */
+  background-color: grey;
+  display: flex;
+  align-items: center;    /* Centrado vertical del contenido */
+  justify-content: flex-start; /* Alineado a la izquierda */
+  padding: 0 10px;        /* Solo horizontal */
+  box-sizing: border-box; /* Evita que el padding rompa el ancho */
+  z-index: 1000;
+}
+
 
 #pack {
   position: absolute;
+  margin-top: 30px;
   top: 0;
   left: 0;
   max-width: 100vw;
@@ -18,9 +34,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  /*   background-color: blue; */
+/*   background-color: blue; */
 }
-
+canvas {
+  display: fixed;
+}
 #pack input[type="text"] {
   width: 37.5px;
   height: 45px;
@@ -81,7 +99,7 @@ input {
 .varDiv {
   display: flex;
   flex-direction: column;
-  /*   background-color: green; */
+/*   background-color: orange; */
 }
 
 .closeButton {
